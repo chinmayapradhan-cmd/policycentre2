@@ -141,3 +141,4 @@ coverage/
 # Lint caches
 .eslintcache
 .stylelintcache
+.vercel

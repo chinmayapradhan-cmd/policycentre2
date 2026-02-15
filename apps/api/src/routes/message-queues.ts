@@ -72,6 +72,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+        console.log(`[API] Fetching queue details for id: ${id}`);
         const queue: any = await runGet('SELECT * FROM message_queues WHERE id = ?', [id]);
 
         if (!queue) {
@@ -118,6 +119,7 @@ router.get('/:id/messages', async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { page = 1, pageSize = 25, filter } = req.query;
+        console.log(`[API] Fetching messages for queue ${id}, filter: ${filter}`);
         const limit = Number(pageSize);
         const offset = (Number(page) - 1) * limit;
 
