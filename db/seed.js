@@ -83,77 +83,88 @@ async function initDb() {
 
     const seedData = JSON.parse(fs.readFileSync(SEED_DATA_PATH, 'utf-8'));
 
-    // Seed Users
-    if (seedData.users) {
-        for (const user of seedData.users) {
-            // Use password from JSON if available, otherwise default to 'admin123'
-            const password = user.password || 'admin123';
-            // Use hashed password from JSON if available, otherwise hash the plaintext password
-            const hashedPassword = user.password_hash || await bcrypt.hash(password, 10);
-            await runRun("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)", [user.username, hashedPassword, user.role]);
+    // Start transaction for faster inserts
+    await runRun("BEGIN TRANSACTION");
+
+    try {
+        // Seed Users
+        if (seedData.users) {
+            for (const user of seedData.users) {
+                // Use password from JSON if available, otherwise default to 'admin123'
+                const password = user.password || 'admin123';
+                // Use hashed password from JSON if available, otherwise hash the plaintext password
+                const hashedPassword = user.password_hash || await bcrypt.hash(password, 10);
+                await runRun("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)", [user.username, hashedPassword, user.role]);
+            }
         }
+
+        // Helper for safe integers (default 0)
+        const safeInt = (val) => (val === null || val === undefined) ? 0 : val;
+        // Helper for safe dates (default now)
+        const safeDate = (val) => val || new Date().toISOString();
+
+        // Seed Message Queues
+        if (seedData.queues) {
+            for (const q of seedData.queues) {
+                await runRun(
+                    "INSERT INTO message_queues (id, name, status, server_id, updated_at) VALUES (?, ?, ?, ?, ?)",
+                    [q.id, q.name, q.status, q.server_id, safeDate(q.updated_at)]
+                );
+            }
+        }
+
+        // Seed Stats
+        if (seedData.stats) {
+            for (const s of seedData.stats) {
+                await runRun(
+                    `INSERT INTO queue_stats 
+                    (queue_id, started, failed, retryable_error, in_flight, unsent, batched, awaiting_retry, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        s.queue_id,
+                        safeInt(s.started),
+                        safeInt(s.failed),
+                        safeInt(s.retryable_error),
+                        safeInt(s.in_flight),
+                        safeInt(s.unsent),
+                        safeInt(s.batched),
+                        safeInt(s.awaiting_retry),
+                        safeDate(s.created_at)
+                    ]
+                );
+            }
+        }
+
+        // Seed Messages
+        if (seedData.messages) {
+            for (const m of seedData.messages) {
+                await runRun(
+                    `INSERT INTO queue_messages
+                    (queue_id, message_id, account, send_time, failed, retryable_error, in_flight, unsent, error_message)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        m.queue_id,
+                        m.message_id,
+                        m.account,
+                        safeDate(m.send_time),
+                        safeInt(m.failed),
+                        safeInt(m.retryable_error),
+                        safeInt(m.in_flight),
+                        safeInt(m.unsent),
+                        m.error_message
+                    ]
+                );
+            }
+        }
+
+        await runRun("COMMIT");
+        console.log('Seeding completed.');
+    } catch (error) {
+        await runRun("ROLLBACK");
+        console.error('Seeding failed, rolled back.', error);
+        throw error;
     }
 
-    // Helper for safe integers (default 0)
-    const safeInt = (val) => (val === null || val === undefined) ? 0 : val;
-    // Helper for safe dates (default now)
-    const safeDate = (val) => val || new Date().toISOString();
-
-    // Seed Message Queues
-    if (seedData.queues) {
-        for (const q of seedData.queues) {
-            await runRun(
-                "INSERT INTO message_queues (id, name, status, server_id, updated_at) VALUES (?, ?, ?, ?, ?)",
-                [q.id, q.name, q.status, q.server_id, safeDate(q.updated_at)]
-            );
-        }
-    }
-
-    // Seed Stats
-    if (seedData.stats) {
-        for (const s of seedData.stats) {
-            await runRun(
-                `INSERT INTO queue_stats 
-                (queue_id, started, failed, retryable_error, in_flight, unsent, batched, awaiting_retry, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    s.queue_id,
-                    safeInt(s.started),
-                    safeInt(s.failed),
-                    safeInt(s.retryable_error),
-                    safeInt(s.in_flight),
-                    safeInt(s.unsent),
-                    safeInt(s.batched),
-                    safeInt(s.awaiting_retry),
-                    safeDate(s.created_at)
-                ]
-            );
-        }
-    }
-
-    // Seed Messages
-    if (seedData.messages) {
-        for (const m of seedData.messages) {
-            await runRun(
-                `INSERT INTO queue_messages
-                (queue_id, message_id, account, send_time, failed, retryable_error, in_flight, unsent, error_message)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    m.queue_id,
-                    m.message_id,
-                    m.account,
-                    safeDate(m.send_time),
-                    safeInt(m.failed),
-                    safeInt(m.retryable_error),
-                    safeInt(m.in_flight),
-                    safeInt(m.unsent),
-                    m.error_message
-                ]
-            );
-        }
-    }
-
-    console.log('Seeding completed.');
     db.close();
 }
 
