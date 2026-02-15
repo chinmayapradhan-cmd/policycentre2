@@ -64,10 +64,10 @@ async function initDb() {
     // Seed Users
     if (seedData.users) {
         for (const user of seedData.users) {
-            // Re-hash for security consistency, or use provided hash if known good
-            // Here we'll just hash 'admin123' if the username is admin, or use a default
-            const password = 'admin123';
-            const hashedPassword = await bcrypt.hash(password, 10);
+            // Use password from JSON if available, otherwise default to 'admin123'
+            const password = user.password || 'admin123';
+            // Use hashed password from JSON if available, otherwise hash the plaintext password
+            const hashedPassword = user.password_hash || await bcrypt.hash(password, 10);
             await runRun("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)", [user.username, hashedPassword, user.role]);
         }
     }
