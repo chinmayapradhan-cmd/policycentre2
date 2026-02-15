@@ -1,0 +1,143 @@
+# =======================================
+#            OS FILES
+# =======================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# =======================================
+#            EDITORS & IDEs
+# =======================================
+# VS Code
+.vscode/
+.history/
+
+# JetBrains (IntelliJ, PyCharm, WebStorm, etc.)
+.idea/
+*.iml
+out/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# =======================================
+#        LOGS & TEMPORARY FILES
+# =======================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tmp
+*.temp
+
+# =======================================
+#        VERSION CONTROL
+# =======================================
+*.orig
+*.rej
+
+# =======================================
+#        ENVIRONMENT VARIABLES
+# =======================================
+.env
+.env.*
+!.env.example
+
+# =======================================
+#        BUILD / DIST
+# =======================================
+dist/
+build/
+target/
+tmp/
+cache/
+
+# =======================================
+#               NODE.JS
+# =======================================
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# =======================================
+#               PYTHON
+# =======================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Python cache / tooling
+*.pyo
+*.pyd
+*.pdb
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+ruff_cache/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# SQLite / local DB
+*.sqlite3
+
+# =======================================
+#             NEXT.JS
+# =======================================
+# Next.js build output
+.next/
+out/
+
+# Next cache
+.next/cache/
+.next/static/
+
+# SSG/SSR export artifacts
+export/
+
+# Turbo Pack output
+.turbopack/
+.turbo/
+
+# Next Image Optimization Cache
+public/_next/
+
+# Dependency caching
+.pnp/
+.pnp.js
+.pnp.cjs
+
+# Testing
+coverage/
+
+# Lint caches
+.eslintcache
+.stylelintcache
