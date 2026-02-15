@@ -36,6 +36,28 @@ async function initDb() {
         });
     };
 
+    // Check if we need to seed
+    const shouldSeed = process.argv.includes('--force');
+
+    if (!shouldSeed) {
+        try {
+            const userCount = await new Promise((resolve, reject) => {
+                db.get("SELECT COUNT(*) as count FROM users", (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row.count);
+                });
+            });
+
+            if (userCount > 0) {
+                console.log('Database already seeded. Use --force to re-seed.');
+                db.close();
+                return;
+            }
+        } catch (e) {
+            console.log('Tables do not exist, proceeding to seed.');
+        }
+    }
+
     // Clear existing data (DELETE to avoid locking issues)
     try {
         await runRun("DELETE FROM queue_messages");
