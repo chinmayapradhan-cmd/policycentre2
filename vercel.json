@@ -23,6 +23,9 @@
             "dest": "/apps/api/src/index.ts"
         },
         {
+            "handle": "filesystem"
+        },
+        {
             "src": "/(.*)",
             "dest": "/apps/web/$1"
         }
